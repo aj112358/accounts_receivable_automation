@@ -5,10 +5,14 @@
 from openpyxl import load_workbook
 from calendar import month_name
 
-MONTHS = [month_name[i] for i in range(len(month_name))]
+MONTHS = list(month_name)
 
 
+# Opens Excel file containing client data.
+# @params: None
+# @return: Excel worksheet.
 def open_file():
+    """Open Excel worksheet containing client data."""
 
     PATH = r"C:\Users\AJ\Desktop\accounts_receivable_automation\client_data_sample.xlsx"
     file = load_workbook(PATH, data_only=True)
@@ -17,43 +21,43 @@ def open_file():
     return ws
 
 
-def get_basic_data(worksheet):
+# Extract columns headers from Excel sheet.
+# @param worksheet: Excel worksheet.
+# @return: List of active column headers.
+def get_column_headers(worksheet) -> list:
 
-    NUM_COLUMNS = worksheet.max_column
-    NUM_ROWS = worksheet.max_row
-
-    COLUMNS = []
-    for i in range(1, NUM_COLUMNS+1):
+    num_columns = worksheet.max_column
+    headers = []
+    for i in range(1, num_columns+1):
         cell_obj = worksheet.cell(row=1, column=i)
-        COLUMNS.append(cell_obj.value)
-    # print(COLUMNS)
+        headers.append(cell_obj.value)
 
-    # # Just a test!!
-    # COLUMNS2 = []
-    # for row in ws.values:
-    #     for value in row:
-    #         # cell_obj = ws.cell(row=1, column=col)
-    #         # COLUMNS2.append(cell_obj.value)
-    #         print(value)
-    # # print(COLUMNS2)
+    return headers
 
-    NAMES = []
-    for j in range(2, NUM_ROWS+1):
+
+# Extract client names from Excel sheet.
+# @param worksheet: Excel worksheet.
+# @return: List of client names.
+def get_client_names(worksheet) -> list:
+
+    num_rows = worksheet.max_row
+    names = []
+    for j in range(2, num_rows+1):
         cell_obj = worksheet.cell(row=j, column=1)
-        if cell_obj.value not in NAMES:
-            NAMES.append(cell_obj.value)
-    # print(NAMES)
+        if cell_obj.value not in names:
+            names.append(cell_obj.value)
 
-    return COLUMNS, NAMES, NUM_COLUMNS, NUM_ROWS
+    return names
 
 
-def get_amounts_owing(month, NAMES, ws, NUM_ROWS) -> dict:
+def get_amounts_owing(month, names, ws) -> dict:
 
-    # Will contain name: [ (date, amount) ]
-    my_dict = {name: [] for name in NAMES}
+    # Values will have structure: [ (date, amount) ]
+    my_dict = {name: [] for name in names}
+    num_rows = ws.max_row
 
     i = 2
-    while i <= NUM_ROWS:
+    while i <= num_rows:
 
         paid = ws.cell(row=i, column=10).value
         y = ws.cell(row=i, column=4).value.month
@@ -63,21 +67,17 @@ def get_amounts_owing(month, NAMES, ws, NUM_ROWS) -> dict:
             owing = ws.cell(row=i, column=9).value
             name = ws.cell(row=i, column=1).value
 
-
             my_dict[name].append((date, owing))
         i += 1
 
     return my_dict
 
 
-# print("Your total amount owing for the month of {0} is: ${1:.2f}".format(month.capitalize(), total_amount))
+def get_phone_nums(ws, names) -> dict:
+    num_rows = ws.max_row
+    my_dict = {name: "" for name in names}
 
-
-def get_phone_nums(ws, NAMES, NUM_ROWS) -> dict:
-
-    my_dict = {name: "" for name in NAMES}
-
-    for i in range(2, NUM_ROWS+1):
+    for i in range(2, num_rows+1):
         name = ws.cell(row=i, column=1).value
         phone = ws.cell(row=i, column=12).value
 
@@ -86,11 +86,11 @@ def get_phone_nums(ws, NAMES, NUM_ROWS) -> dict:
     return my_dict
 
 
-def print_results(results: dict, month: str, phone_nums: dict):
+def print_results(results: dict, month: str):
 
     for name in results:
 
-        if results[name]:
+        if results[name]:  # There is an amount owing.
 
             totals = list(zip(*results[name]))[1]
             total = sum(totals)
@@ -98,6 +98,11 @@ def print_results(results: dict, month: str, phone_nums: dict):
 
         else:
             print(f"{name}: All good!")
+
+
+# Creates text file containing name/amount owing/phone number of client.
+# @param results:
+def save_results(results: dict, month: str, phone_nums: dict) -> None:
 
     with open(f"{month}.txt", mode='w') as file:
         for name in results:
@@ -111,11 +116,26 @@ def print_results(results: dict, month: str, phone_nums: dict):
 def main():
     ws = open_file()
     month = input("What month (full name)? ").capitalize()
-    COLUMNS, NAMES, NUM_COLUMNS, NUM_ROWS = get_basic_data(ws)
-    results = get_amounts_owing(month, NAMES, ws, NUM_ROWS)
-    phone_nums = get_phone_nums(ws, NAMES, NUM_ROWS)
-    print_results(results, month, phone_nums)
+    COLUMNS = get_column_headers(ws)
+    names = get_client_names(ws)
+
+    NUM_COLUMNS = ws.max_column
+    NUM_ROWS = ws.max_row
+
+    results = get_amounts_owing(month, names, ws)
+    phone_nums = get_phone_nums(ws, names)
+    print_results(results, month)
+
+    save_results(results, month, phone_nums)
 
 
 if __name__ == "__main__":
     main()
+
+
+
+##### OLD CODES #####
+
+
+# print("Your total amount owing for the month of {0} is: ${1:.2f}".format(month.capitalize(), total_amount))
+

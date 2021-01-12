@@ -51,7 +51,7 @@ def send_messages(messages):
 
     for number in messages:
         body = messages[number]
-        from_number = TWILIO_NUM
+        from_number = TWILIO_NUM  # Already has +1 on it.
         to_number = "+1" + number
 
         # Make API calls here...

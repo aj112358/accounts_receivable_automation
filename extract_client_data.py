@@ -4,6 +4,7 @@
 
 from openpyxl import load_workbook
 from calendar import month_name
+from tabulate import tabulate
 
 MONTHS = list(month_name)
 
@@ -11,25 +12,25 @@ MONTHS = list(month_name)
 # Opens Excel file containing client data.
 # @params: None
 # @return: Excel worksheet.
-def open_file():
+def open_file(path):
     """Open Excel worksheet containing client data."""
 
-    PATH = r"C:\Users\AJ\Desktop\accounts_receivable_automation\client_data_sample.xlsx"
-    file = load_workbook(PATH, data_only=True)
-    ws = file.active
+    file = load_workbook(path, data_only=True)
+    worksheet = file.active
 
-    return ws
+    return worksheet
 
 
 # Extract columns headers from Excel sheet.
 # @param worksheet: Excel worksheet.
 # @return: List of active column headers.
+# NOTE: Unused function as of now (Jan 12, 2021).
 def get_column_headers(worksheet) -> list:
 
     num_columns = worksheet.max_column
     headers = []
-    for i in range(1, num_columns+1):
-        cell_obj = worksheet.cell(row=1, column=i)
+    for j in range(1, num_columns+1):
+        cell_obj = worksheet.cell(row=1, column=j)
         headers.append(cell_obj.value)
 
     return headers
@@ -42,66 +43,86 @@ def get_client_names(worksheet) -> list:
 
     num_rows = worksheet.max_row
     names = []
-    for j in range(2, num_rows+1):
-        cell_obj = worksheet.cell(row=j, column=1)
+    for i in range(2, num_rows+1):
+        cell_obj = worksheet.cell(row=i, column=1)
         if cell_obj.value not in names:
             names.append(cell_obj.value)
 
     return names
 
 
-def get_amounts_owing(month, names, ws) -> dict:
+# Determine which clients have amounts owing.
+# @param month: Specified month to check.
+# @param names: List of client names.
+# @param worksheet: Active Excel worksheet.
+# @return: Dictionary of clients with amount owing.
+def get_amounts_owing(month, names, worksheet) -> dict:
 
-    # Values will have structure: [ (date, amount) ]
+    # Dictionary values will have structure: [ (date, amount) ]
     my_dict = {name: [] for name in names}
-    num_rows = ws.max_row
-
-    i = 2
-    while i <= num_rows:
-
-        paid = ws.cell(row=i, column=10).value
-        y = ws.cell(row=i, column=4).value.month
-
-        if not paid and y == MONTHS.index(month):
-            date = ws.cell(row=i, column=4).value
-            owing = ws.cell(row=i, column=9).value
-            name = ws.cell(row=i, column=1).value
-
-            my_dict[name].append((date, owing))
-        i += 1
-
-    return my_dict
-
-
-def get_phone_nums(ws, names) -> dict:
-    num_rows = ws.max_row
-    my_dict = {name: "" for name in names}
+    num_rows = worksheet.max_row
 
     for i in range(2, num_rows+1):
-        name = ws.cell(row=i, column=1).value
-        phone = ws.cell(row=i, column=12).value
 
-        my_dict[name] = phone
+        paid = worksheet.cell(row=i, column=10).value
+        month_num = worksheet.cell(row=i, column=4).value.month
+
+        if not paid and month_num == MONTHS.index(month):
+            name = worksheet.cell(row=i, column=1).value
+            date = worksheet.cell(row=i, column=4).value
+            owing = worksheet.cell(row=i, column=9).value
+
+            my_dict[name].append((date, owing))
 
     return my_dict
 
 
+# Extract client phone numbers from Excel worksheet.
+# @params worksheet: Excel worksheet containing client data.
+# @params names: List containing names of all clients.
+# @return: Dictionary containing phone number of each client
+def get_phone_nums(worksheet, names) -> dict:
+    """Extract phone numbers of each client into a dictionary."""
+
+    num_rows = worksheet.max_row
+    phone = {name: "" for name in names}
+
+    for i in range(2, num_rows+1):
+        name = worksheet.cell(row=i, column=1).value
+        number = worksheet.cell(row=i, column=12).value
+
+        phone[name] = number
+
+    return phone
+
+
+# Print results of amounts owing to terminal.
+# @param results: Dictionary containing clients' amounts owing.
+# @param month: Specified month to check.
+# @return: None.
 def print_results(results: dict, month: str):
+    """Print amounts owing for each client to the terminal."""
 
+    table_headers = ["Name", "Owing"]
+    data = []
+
+    print(f"\nHere are the amounts owing for {month}:")
     for name in results:
-
         if results[name]:  # There is an amount owing.
-
             totals = list(zip(*results[name]))[1]
             total = sum(totals)
-            print("{0}: ${1:.2f}".format(name, total))
-
+            data.append([name, "${0:.2f}".format(total)])
         else:
-            print(f"{name}: All good!")
+            data.append([name, "All good!"])
+
+    print("\n", tabulate(data, table_headers))
 
 
 # Creates text file containing name/amount owing/phone number of client.
-# @param results:
+# @param results: Dictionary containing clients' amounts owing.
+# @param month: Specified month to check.
+# @param phone_nums: Dictionary containing clients' phone numbers.
+# @return: None.
 def save_results(results: dict, month: str, phone_nums: dict) -> None:
 
     with open(f"{month}.txt", mode='w') as file:
@@ -114,28 +135,18 @@ def save_results(results: dict, month: str, phone_nums: dict) -> None:
 
 
 def main():
-    ws = open_file()
+    path = r"C:\Users\AJ\Desktop\accounts_receivable_automation\client_data_sample.xlsx"
+    worksheet = open_file(path)
     month = input("What month (full name)? ").capitalize()
-    COLUMNS = get_column_headers(ws)
-    names = get_client_names(ws)
 
-    NUM_COLUMNS = ws.max_column
-    NUM_ROWS = ws.max_row
+    names = get_client_names(worksheet)
+    phone_nums = get_phone_nums(worksheet, names)
 
-    results = get_amounts_owing(month, names, ws)
-    phone_nums = get_phone_nums(ws, names)
+    results = get_amounts_owing(month, names, worksheet)
+
     print_results(results, month)
-
     save_results(results, month, phone_nums)
 
 
 if __name__ == "__main__":
     main()
-
-
-
-##### OLD CODES #####
-
-
-# print("Your total amount owing for the month of {0} is: ${1:.2f}".format(month.capitalize(), total_amount))
-

@@ -2,7 +2,7 @@
 # Created By: AJ Singh
 # Date: Jan 10, 2021
 
-import openpyxl
+from openpyxl import load_workbook
 from calendar import month_name
 
 MONTHS = [month_name[i] for i in range(len(month_name))]
@@ -11,7 +11,7 @@ MONTHS = [month_name[i] for i in range(len(month_name))]
 def open_file():
 
     PATH = r"C:\Users\AJ\Desktop\accounts_receivable_automation\client_data_sample.xlsx"
-    file = openpyxl.load_workbook(PATH, data_only=True)
+    file = load_workbook(PATH, data_only=True)
     ws = file.active
 
     return ws
@@ -21,6 +21,7 @@ def get_basic_data(worksheet):
 
     NUM_COLUMNS = worksheet.max_column
     NUM_ROWS = worksheet.max_row
+
     COLUMNS = []
     for i in range(1, NUM_COLUMNS+1):
         cell_obj = worksheet.cell(row=1, column=i)
@@ -46,12 +47,11 @@ def get_basic_data(worksheet):
     return COLUMNS, NAMES, NUM_COLUMNS, NUM_ROWS
 
 
-def get_amounts_owing(month, NAMES, ws, NUM_ROWS):
+def get_amounts_owing(month, NAMES, ws, NUM_ROWS) -> dict:
 
     # Will contain name: [ (date, amount) ]
     my_dict = {name: [] for name in NAMES}
 
-    # dates, amounts = [], []
     i = 2
     while i <= NUM_ROWS:
 
@@ -63,8 +63,6 @@ def get_amounts_owing(month, NAMES, ws, NUM_ROWS):
             owing = ws.cell(row=i, column=9).value
             name = ws.cell(row=i, column=1).value
 
-            # dates.append(date)
-            # amounts.append(owing)
             my_dict[name].append((date, owing))
         i += 1
 
@@ -81,7 +79,6 @@ def print_results(results: dict):
         if results[name]:
 
             totals = list(zip(*results[name]))[1]
-
             total = sum(totals)
             print("{0}: ${1:.2f}".format(name, total))
 

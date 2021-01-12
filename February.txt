@@ -1,0 +1,3 @@
+Barret,$340.00
+Aerith,$80.00
+Vincent,$160.00

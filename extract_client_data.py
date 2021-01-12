@@ -62,6 +62,7 @@ def get_amounts_owing(month, NAMES, ws, NUM_ROWS) -> dict:
             date = ws.cell(row=i, column=4).value
             owing = ws.cell(row=i, column=9).value
             name = ws.cell(row=i, column=1).value
+            phone = ws.cell(row=i, column=12).value
 
             my_dict[name].append((date, owing))
         i += 1
@@ -72,7 +73,14 @@ def get_amounts_owing(month, NAMES, ws, NUM_ROWS) -> dict:
 # print("Your total amount owing for the month of {0} is: ${1:.2f}".format(month.capitalize(), total_amount))
 
 
-def print_results(results: dict):
+def get_phone_nums(ws) -> dict:
+
+
+
+
+
+
+def print_results(results: dict, month: str):
 
     for name in results:
 
@@ -85,13 +93,21 @@ def print_results(results: dict):
         else:
             print(f"{name}: All good!")
 
+    with open(f"{month}.txt", mode='w') as file:
+        for name in results:
+            if results[name]:
+                totals = list(zip(*results[name]))[1]
+                total = sum(totals)
+                phone =
+                file.write("{0},${1:.2f},{2}\n".format(name, total, ))
+
 
 def main():
     ws = open_file()
     month = input("What month (full name)? ").capitalize()
     COLUMNS, NAMES, NUM_COLUMNS, NUM_ROWS = get_basic_data(ws)
     results = get_amounts_owing(month, NAMES, ws, NUM_ROWS)
-    print_results(results)
+    print_results(results, month)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,18 @@
+Cloud,All good!
+Barret,$340.00
+Tifa,All good!
+Cid,All good!
+Red,All good!
+Aerith,$80.00
+Vincent,$160.00
+Sephiroth,All good!
+Cait,All good!
+Yuffie,All good!
+Jessie,All good!
+
+=====
+Barret,$340.00
+Aerith,$80.00
+Vincent,$160.00
+
+=====

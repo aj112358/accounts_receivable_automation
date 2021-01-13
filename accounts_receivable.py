@@ -5,6 +5,7 @@
 import extract_client_data
 import create_text_messages
 from calendar import month_name
+from os.path import dirname
 
 MONTHS = list(month_name)
 
@@ -12,11 +13,13 @@ MONTHS = list(month_name)
 def main():
 
     path = input("\nWhat is the path to the Excel file: \n")  # .encode('unicode-escape').decode()
-
     month = input("\nEnter full name of month: ").capitalize()
     while month not in MONTHS:
         print("Invalid month!")
         month = input("\nEnter full name of month: ").capitalize()
+
+    directory = dirname(path)
+    month_file = directory + f"\\{month}.txt"
 
     extract_client_data.main(path, month)
     create_text_messages.main()

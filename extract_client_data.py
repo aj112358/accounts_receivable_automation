@@ -12,10 +12,10 @@ MONTHS = list(month_name)
 # Opens Excel file containing client data.
 # @params: None
 # @return: Excel worksheet.
-def open_file(path):
+def open_file(file_path):
     """Open Excel worksheet containing client data."""
 
-    file = load_workbook(path, data_only=True)
+    file = load_workbook(file_path, data_only=True)
     worksheet = file.active
 
     return worksheet
@@ -125,13 +125,13 @@ def print_results(results: dict, month: str):
 # @return: None.
 def save_results(results: dict, month: str, phone_nums: dict) -> None:
 
-    with open(f"{month}.txt", mode='w') as file:
+    with open(f"{month}.txt", mode='w') as out_file:
         for name in results:
             if results[name]:
                 totals = list(zip(*results[name]))[1]
                 total = sum(totals)
                 phone = phone_nums[name]
-                file.write("{0},${1:.2f},{2}\n".format(name, total, phone))
+                out_file.write("{0},${1:.2f},{2}\n".format(name, total, phone))
 
 
 def main(path, month):

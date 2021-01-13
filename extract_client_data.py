@@ -134,7 +134,7 @@ def save_results(results: dict, month: str, phone_nums: dict) -> None:
                 out_file.write("{0},${1:.2f},{2}\n".format(name, total, phone))
 
 
-def main(path, month):
+def extract_client_data(path, month):
 
     worksheet = open_file(path)
 
@@ -153,4 +153,4 @@ if __name__ == "__main__":
     while month not in MONTHS:
         print("Invalid month!")
         month = input("\nEnter full name of month: ").capitalize()
-    main(path, month)
+    extract_client_data(path, month)

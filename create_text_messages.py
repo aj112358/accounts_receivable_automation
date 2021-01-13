@@ -13,19 +13,14 @@ TWILIO_NUM = environ['TWILIO_NUM']
 # Instantiate client object.
 # client = Client(ACCOUNT_SID, AUTH_TOKEN)
 
-PATH = r"C:\Users\AJ\Desktop\accounts_receivable_automation\March.txt"
-# PATH = r"C:\Users\AJ\Desktop\test.txt"
-
-month_name = PATH[PATH.rindex("\\", -14)+1:-4]
-
 
 # Get amount owing data from text file created by 'extract_client_data.py'
 # @params: None.
 # @return: List of lines in text file.
-def load_data() -> list:
+def load_data(text_file) -> list:
     """Extract each line of data from text file."""
 
-    file = open(PATH)
+    file = open(text_file)
     data = []
 
     line = file.readline().strip("\n")
@@ -77,12 +72,18 @@ def send_messages(messages):
         print(message.sid)
 
 
-def main():
-    data = load_data()
+def create_text_messages(PATH):
+    # PATH = r"C:\Users\AJ\Desktop\accounts_receivable_automation\March.txt"
+    # PATH = r"C:\Users\AJ\Desktop\test.txt"
+
+    month_name = PATH[PATH.rindex("\\", -14) + 1:-4]
+
+
+    data = load_data(PATH)
     messages = create_messages(data)
 
     # send_messages(messages)
 
 
 if __name__ == '__main__':
-    main()
+    create_text_messages()

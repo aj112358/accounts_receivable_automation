@@ -77,7 +77,7 @@ def send_messages(messages: dict) -> str:
 # Main function to create text messages to send to clients.
 # @param file_path: Path to text file containing summary of amount owing data.
 # @return: None.
-def create_text_messages(file_path):
+def create_text_messages(file_path: str) -> None:
     """Loads file, creates text messages, and sends them upon approval."""
 
     data = load_data(file_path)

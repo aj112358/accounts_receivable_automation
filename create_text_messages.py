@@ -13,8 +13,10 @@ TWILIO_NUM = environ['TWILIO_NUM']
 # Instantiate client object.
 # client = Client(ACCOUNT_SID, AUTH_TOKEN)
 
-# PATH = r"C:\Users\AJ\Desktop\accounts_receivable_automation\March.txt"
-PATH = r"C:\Users\AJ\Desktop\test.txt"
+PATH = r"C:\Users\AJ\Desktop\accounts_receivable_automation\March.txt"
+# PATH = r"C:\Users\AJ\Desktop\test.txt"
+
+month_name = PATH[PATH.rindex("\\", -14)+1:-4]
 
 
 # Get amount owing data from text file created by 'extract_client_data.py'
@@ -45,9 +47,13 @@ def create_messages(data: list) -> dict:
     messages = {}
     for person in data:
         name, amount, phone = person[0], person[1], person[2]
-        body = f"Hey {name}, your amount owing for the month of (MARCH) is {amount}."
+        body = f"Hey {name}, your amount owing for the month of {month_name} is {amount}."
 
         messages[phone] = body
+
+    print("\nHere are the messages to be sent:\n")
+    for key in messages:
+        print(messages[key])
 
     return messages
 
@@ -57,6 +63,10 @@ def create_messages(data: list) -> dict:
 # @return: None.
 def send_messages(messages):
     """Connect to Twilio and send text messages."""
+
+    approval = input("Do you wish to send these messages? Type 'yes' or 'no': ")
+    if approval.lower() != 'yes':
+        return "Messages not sent. Please run the program again."
 
     for number in messages:
         body = messages[number]
@@ -70,7 +80,7 @@ def send_messages(messages):
 def main():
     data = load_data()
     messages = create_messages(data)
-    print(messages)
+
     # send_messages(messages)
 
 

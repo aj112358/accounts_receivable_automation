@@ -134,10 +134,9 @@ def save_results(results: dict, month: str, phone_nums: dict) -> None:
                 file.write("{0},${1:.2f},{2}\n".format(name, total, phone))
 
 
-def main():
-    path = r"C:\Users\AJ\Desktop\accounts_receivable_automation\client_data_sample.xlsx"
+def main(path, month):
+
     worksheet = open_file(path)
-    month = input("What month (full name)? ").capitalize()
 
     names = get_client_names(worksheet)
     phone_nums = get_phone_nums(worksheet, names)
@@ -149,4 +148,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    path = r"C:\Users\AJ\Desktop\accounts_receivable_automation\client_data_sample.xlsx"
+    month = input("\nEnter full name of month: ").capitalize()
+    while month not in MONTHS:
+        print("Invalid month!")
+        month = input("\nEnter full name of month: ").capitalize()
+    main(path, month)

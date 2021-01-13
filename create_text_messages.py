@@ -1,4 +1,4 @@
-# This program sends personalized messages to all your clients about their amount owing.
+# This program creates personalized messages to all your clients about their amount owing.
 # Created By: AJ Singh
 # Date: Jan 11, 2021
 
@@ -11,11 +11,11 @@ AUTH_TOKEN = environ['TWILIO_AUTH_TOKEN']
 TWILIO_NUM = environ['TWILIO_NUM']
 
 # Instantiate client object.
-# client = Client(ACCOUNT_SID, AUTH_TOKEN)
+client = Client(ACCOUNT_SID, AUTH_TOKEN)
 
 
 # Get amount owing data from text file created by 'extract_client_data.py'
-# @params: None.
+# @params text_file: Path for text file containing summary of amounts owing.
 # @return: List of lines in text file.
 def load_data(text_file) -> list:
     """Extract each line of data from text file."""
@@ -36,7 +36,7 @@ def load_data(text_file) -> list:
 # Create text messages to send to clients:
 # @param data: List of amount owing data for each client.
 # @return: Dictionary of phone:message key-value pairs.
-def create_messages(data: list) -> dict:
+def create_messages(data: list, month_name: str) -> dict:
     """Create messages for each client including their amount owing."""
 
     messages = {}
@@ -55,13 +55,13 @@ def create_messages(data: list) -> dict:
 
 # Connect to Twilio account to send text messages to clients.
 # @param messages: Dictionary of phone:message key-value pairs.
-# @return: None.
-def send_messages(messages):
+# @return: String output for (un)successful delivery of messages
+def send_messages(messages: dict) -> str:
     """Connect to Twilio and send text messages."""
 
-    approval = input("Do you wish to send these messages? Type 'yes' or 'no': ")
+    approval = input("\nDo you wish to send these messages? Type 'yes' or 'no': ")
     if approval.lower() != 'yes':
-        return "Messages not sent. Please run the program again."
+        return "Messages not approved. Please run the program again."
 
     for number in messages:
         body = messages[number]
@@ -71,19 +71,23 @@ def send_messages(messages):
         message = client.messages.create(body=body, from_=from_number, to=to_number)
         print(message.sid)
 
-
-def create_text_messages(PATH):
-    # PATH = r"C:\Users\AJ\Desktop\accounts_receivable_automation\March.txt"
-    # PATH = r"C:\Users\AJ\Desktop\test.txt"
-
-    month_name = PATH[PATH.rindex("\\", -14) + 1:-4]
+    return "All messages sent!"
 
 
-    data = load_data(PATH)
-    messages = create_messages(data)
+# Main function to create text messages to send to clients.
+# @param file_path: Path to text file containing summary of amount owing data.
+# @return: None.
+def create_text_messages(file_path):
+    """Loads file, creates text messages, and sends them upon approval."""
 
-    # send_messages(messages)
+    data = load_data(file_path)
+    month_name = file_path[file_path.rindex("\\", -14) + 1:-4]
+
+    messages = create_messages(data, month_name)
+    success = send_messages(messages)
+    print(success)
 
 
 if __name__ == '__main__':
-    create_text_messages()
+    path = r"C:\Users\AJ\Desktop\test.txt"
+    create_text_messages(path)

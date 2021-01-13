@@ -10,9 +10,9 @@ MONTHS = list(month_name)
 
 
 # Opens Excel file containing client data.
-# @params: None
+# @params file_path: Path to main Excel file.
 # @return: Excel worksheet.
-def open_file(file_path):
+def open_file(file_path: str):
     """Open Excel worksheet containing client data."""
 
     file = load_workbook(file_path, data_only=True)
@@ -21,11 +21,12 @@ def open_file(file_path):
     return worksheet
 
 
-# Extract columns headers from Excel sheet.
+# Extract column headers from Excel sheet.
 # @param worksheet: Excel worksheet.
 # @return: List of active column headers.
 # NOTE: Unused function as of now (Jan 12, 2021).
 def get_column_headers(worksheet) -> list:
+    """Get list of column headers from Excel sheet."""
 
     num_columns = worksheet.max_column
     headers = []
@@ -40,6 +41,7 @@ def get_column_headers(worksheet) -> list:
 # @param worksheet: Excel worksheet.
 # @return: List of client names.
 def get_client_names(worksheet) -> list:
+    """Get list of client names from Excel worksheet."""
 
     num_rows = worksheet.max_row
     names = []
@@ -56,14 +58,14 @@ def get_client_names(worksheet) -> list:
 # @param names: List of client names.
 # @param worksheet: Active Excel worksheet.
 # @return: Dictionary of clients with amount owing.
-def get_amounts_owing(month, names, worksheet) -> dict:
+def get_amounts_owing(month: str, names: list, worksheet) -> dict:
+    """Compute amounts owing for each client."""
 
     # Dictionary values will have structure: [ (date, amount) ]
-    my_dict = {name: [] for name in names}
+    amounts_owing = {name: [] for name in names}
     num_rows = worksheet.max_row
 
     for i in range(2, num_rows+1):
-
         paid = worksheet.cell(row=i, column=10).value
         month_num = worksheet.cell(row=i, column=4).value.month
 
@@ -72,16 +74,16 @@ def get_amounts_owing(month, names, worksheet) -> dict:
             date = worksheet.cell(row=i, column=4).value
             owing = worksheet.cell(row=i, column=9).value
 
-            my_dict[name].append((date, owing))
+            amounts_owing[name].append((date, owing))
 
-    return my_dict
+    return amounts_owing
 
 
 # Extract client phone numbers from Excel worksheet.
 # @params worksheet: Excel worksheet containing client data.
 # @params names: List containing names of all clients.
 # @return: Dictionary containing phone number of each client
-def get_phone_nums(worksheet, names) -> dict:
+def get_phone_nums(worksheet, names: list) -> dict:
     """Extract phone numbers of each client into a dictionary."""
 
     num_rows = worksheet.max_row
@@ -100,7 +102,7 @@ def get_phone_nums(worksheet, names) -> dict:
 # @param results: Dictionary containing clients' amounts owing.
 # @param month: Specified month to check.
 # @return: None.
-def print_results(results: dict, month: str):
+def print_results(results: dict, month: str) -> None:
     """Print amounts owing for each client to the terminal."""
 
     table_headers = ["Name", "Owing"]
@@ -108,7 +110,7 @@ def print_results(results: dict, month: str):
 
     print(f"\nHere are the amounts owing for {month}:")
     for name in results:
-        if results[name]:  # There is an amount owing.
+        if results[name]:  # If there is an amount owing.
             totals = list(zip(*results[name]))[1]
             total = sum(totals)
             data.append([name, "${0:.2f}".format(total)])
@@ -124,19 +126,26 @@ def print_results(results: dict, month: str):
 # @param phone_nums: Dictionary containing clients' phone numbers.
 # @return: None.
 def save_results(results: dict, month: str, phone_nums: dict) -> None:
+    """Create text file containing a client's name, amount owing, and phone number."""
 
     with open(f"{month}.txt", mode='w') as out_file:
         for name in results:
-            if results[name]:
+            if results[name]:  # Only record non-zero amounts owing.
                 totals = list(zip(*results[name]))[1]
                 total = sum(totals)
                 phone = phone_nums[name]
                 out_file.write("{0},${1:.2f},{2}\n".format(name, total, phone))
 
 
-def extract_client_data(path, month):
+# Main function to extract client data from Excel sheet and
+# store amounts owing in a text file.
+# @param path: Path to main Excel file.
+# @param month: Specified month to check.
+# @return: None.
+def extract_client_data(file_path: str, month: str) -> None:
+    """Get amounts owing for each client, print results to terminal, and save to text file."""
 
-    worksheet = open_file(path)
+    worksheet = open_file(file_path)
 
     names = get_client_names(worksheet)
     phone_nums = get_phone_nums(worksheet, names)
@@ -149,8 +158,8 @@ def extract_client_data(path, month):
 
 if __name__ == "__main__":
     path = r"C:\Users\AJ\Desktop\accounts_receivable_automation\client_data_sample.xlsx"
-    month = input("\nEnter full name of month: ").capitalize()
-    while month not in MONTHS:
+    month_name = input("\nEnter full name of month: ").capitalize()
+    while month_name not in MONTHS:
         print("Invalid month!")
-        month = input("\nEnter full name of month: ").capitalize()
-    extract_client_data(path, month)
+        month_name = input("\nEnter full name of month: ").capitalize()
+    extract_client_data(path, month_name)

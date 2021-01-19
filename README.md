@@ -18,8 +18,8 @@ There is one main goal for this project:
 ## Explanation of Python Files
 Here is a list of the Python modules:
 * [extract_client_data](/extract_client_data.py)
-* create_text_messages.py
-* accounts_receivable.py (MAIN)
+* [create_text_messages](/create_text_messages.py)
+* [accounts_receivable (MAIN)](/accounts_receivable.py)
 
 
 ### extract_client_data.py

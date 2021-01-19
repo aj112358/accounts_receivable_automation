@@ -7,7 +7,7 @@ In my private small business, clients make their payments with varying frequency
 
 ## Project Goals
 There is one main goal for this project:
-* 1. Create and send personalized text messages to all my clients that have a non-zero amount owing.
+1. Create and send personalized text messages to all my clients that have a non-zero amount owing.
 
 
 ## Python Libraries Used
@@ -17,7 +17,7 @@ There is one main goal for this project:
 
 ## Explanation of Python Files
 Here is a list of the Python modules:
-* extract_client_data.py
+* [extract_client_data](/extract_client_data.py)
 * create_text_messages.py
 * accounts_receivable.py (MAIN)
 
